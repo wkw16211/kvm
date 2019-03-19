@@ -1,0 +1,54 @@
+#!/bin/bash
+./domain.script
+#################################################################
+disk_create(){
+name1=$1.qcow2
+if [ "$2" == "disk" ];then
+    virsh vol-create-as vmdisk $name1-$3 $4G --format qcow2
+    cd /etc/libvirt/qemu/kevin-disk
+#    sed -i 's/sdb/\$3/' $name
+    cat > /etc/libvirt/qemu/kevin-disk/$1.xml-$3 << www
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='qcow2'/> 
+      <source file='/kvm/disk/$name1-$3'/> 
+      <target dev='$3' bus='virtio'/>
+    </disk>
+www
+    virsh attach-device $1 $1.xml-$3 --persistent
+elif [ "$2" ==  "de-d" ];then
+    cd /etc/libvirt/qemu/kevin-disk
+    virsh detach-device $1 $1.xml-$3 --persistent
+    rm -rf  $1.xml-$3
+    cd /kvm/disk
+    rm -rf $name1-$3
+    virsh pool-destroy vmdisk &> /dev/null
+    virsh pool-start vmdisk &> /dev/null
+    echo "the volume is delete ok"
+fi
+###############################################################
+if [ $2 == "cpu" ] &> /dev/null;then
+    virsh setvcpus $1 $3 --live
+###############################################################
+elif [ $2 == "mem" ] &> /dev/null;then
+    virsh setmem $1 $3 --live
+fi
+##############################################################
+if [ $2 == "network" ]&>/dev/null;then
+    mac1=`source /kvm/uuid.xml mac`
+    cd /etc/libvirt/qemu/networks
+    cat > /etc/libvirt/qemu/networks/$1-$3.xml << www
+<interface type='network'>
+       <mac address='$mac1' />
+       <source network='default' />
+       <model type='virtio' />
+       <address type='pci' slot='0x$3' />
+</interface>
+www
+     virsh attach-device $1 $1-$3.xml --persistent
+elif [ "$2" ==  "de-n" ];then
+    cd /etc/libvirt/qemu/networks
+    virsh detach-device $1 $1-$3.xml --persistent
+    rm -rf  $1-$3.xml
+fi
+}
+disk_create $1 $2 $3 $4

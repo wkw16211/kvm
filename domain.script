@@ -1,0 +1,16 @@
+#!/bin/bash
+Check_dom(){
+state=$(virsh list --all |awk '$2=="'$1'"{print $3}')
+domain=$(virsh list --all |awk '{print $2}'|sed -r '/^$/d;1d')
+[ -z "$1" ]&&echo "Usage:`basename $0` <domain> [-a <size>] [-d <device>]"&&exit
+for i in $domain;do
+    w=0
+    [ $1 ==  $i ]&&w=1&&break
+done
+if [ $w -eq 0 ];then
+   echo "error:the domain is not exist"&&exit
+elif [ $w -ne 0 ];then
+  [ "$state" != "running" ]&& echo "error:the domain is not running"&& exit
+fi
+}
+Check_dom $1

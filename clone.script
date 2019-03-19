@@ -1,0 +1,18 @@
+#!/bin/bash
+./domain.script
+#################################################################
+Clone_host(){
+uuid1=`source /kvm/uuid.xml uuid`
+mac1=`source /kvm/uuid.xml mac`
+cd /var/lib/libvirt/images/
+qemu-img create -f qcow2 -b $1.qcow2 clone$2.qcow2
+cp /etc/libvirt/qemu/clone/clone.xml /etc/libvirt/qemu/clone/clone$2.xml
+sed -i "s/aaaaa/$1-clone$2/"  /etc/libvirt/qemu/clone/clone$2.xml
+sed -i "s/wwwww/$uuid1/"  /etc/libvirt/qemu/clone/clone$2.xml
+sed -i "s/kkkkk/$mac1/"  /etc/libvirt/qemu/clone/clone$2.xml
+#sed -i "s/qqqqq/$mac1/"  /etc/libvirt/qemu/clone/clone$2.xml
+sed -i "s/ooooo/clone$2/"  /etc/libvirt/qemu/clone/clone$2.xml
+virsh define /etc/libvirt/qemu/clone/clone$2.xml
+}
+Clone_host $1 $2
+

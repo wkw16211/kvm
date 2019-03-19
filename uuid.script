@@ -1,0 +1,24 @@
+#!/bin/bash
+UUID(){
+a=({0..9} {a..f})
+nub=0
+while [ "$nub" -lt "$1" ] ;do
+    for i in {1,2} ;do
+        suiji=$[RANDOM%16]
+        echo -n ${a[suiji]}
+    done
+    let nub++
+done
+}
+Kevin(){
+if [ $1 == "slot" ] &> /dev/null;then
+echo -n ${a[suiji]};echo
+elif [ $1 == "uuid" ] &> /dev/null;then
+UUID 4;echo -n "-";UUID 2;echo -n "-";UUID 2;echo -n "-";UUID 2;echo -n "-";UUID 6;echo 
+elif [ $1 == "mac" ] &> /dev/null;then
+UUID 1;echo -n ":";UUID 1;echo -n ":";UUID 1;echo -n ":";UUID 1;echo -n ":";UUID 1;echo -n ":";UUID 1;echo 
+else
+    echo "只能接参数mac或uuid或slot"
+fi
+}
+Kevin $1
